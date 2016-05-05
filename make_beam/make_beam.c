@@ -717,6 +717,47 @@ int get_jones(int nstation,int nchan,int npol,char *jones_file,complex double **
 
 
 }
+
+/*
+ * calc_beam function
+ *
+ * This function encapsulates the lowest-level mathematical operations that constitute
+ * "phasing up" the array to a given pointing. It operates on a file stream whose
+ * format must be that produced by the "recombine" operation.
+ *
+ * INPUTS:
+ *   - FILE           *in               The file stream of recombined data that is operated on
+ *   - int            nchan             The number of fine channels per coarse channel
+ *   - int            nstation          The number of stations (=tiles)
+ *   - int            npol              The number of polarisations
+ *   - double         *weights_array    Contains weights (0 or 1) for each station and
+ *                                      polarisation
+ *   - double         **phases_array    Contains phases for each station, polarisation, fine
+ *                                      channel, and second.
+ *   - complex double **jones_array     Contains (inverse) Jones matrix information (previously
+ *                                      called **invJi)
+ *
+ * OUTPUTS:
+ *   - FILE           *out              The file stream to which the result is written
+ *   - int            [return value]    Exit status (success/failure)
+ */
+
+int calc_beam( FILE *in,
+               int nchan,
+               int nstation,
+               int npol,
+               double *weights_array,
+               double **phases_array,
+               complex double **jones_array,
+               FILE *out )
+{
+
+}
+
+/*
+ * MAIN function
+ */
+
 int main(int argc, char **argv) {
 
     fprintf(stderr,"Starting ...\n");
@@ -800,7 +841,6 @@ int main(int argc, char **argv) {
 
     int nchan = 128;
     
-    nfrequency = nchan;
     nstation = 128;
     npol=2;
 
@@ -822,7 +862,7 @@ int main(int argc, char **argv) {
                     }
                     break;
                 case '2':
-// EDIT: Consider taking this whole case 2 out -- it doesn't seem to ever be used
+// EDIT: Consider taking this whole case 2 out -- it doesn't seem to ever be used -- but check this
                     out2 = atoi(optarg);
                     sprintf(out2_name,"input_%.3d_%.2d.txt",out2,me);
                     out2_file = fopen(out2_name,"w");
@@ -957,11 +997,10 @@ int main(int argc, char **argv) {
         case 128:
             edge = 0;
             fft_mode = 1;
-// EDIT:    break;
+            break;
         default:
-// EDIT: swap next two lines
-            fft_mode = 1;
             edge = 0;
+            fft_mode = 1;
     }
    
     if (ipfb > 0) { // overide fft_mode
@@ -1013,9 +1052,9 @@ int main(int argc, char **argv) {
             gains_file=strdup(pattern);
             fprintf(stdout,"gains_file: %s\n",gains_file);
         }
-        sprintf(pattern,"%s/%s",procdir,"channel");
 
         FILE *tmp;
+        sprintf(pattern,"%s/%s",procdir,"channel");
         tmp = fopen(pattern,"r");
 
         if (tmp) {
@@ -1023,7 +1062,7 @@ int main(int argc, char **argv) {
             fclose(tmp);
         }
         else {
-            perror("Cannot find channel file - version missmatch - update get_delays");
+            perror("Cannot find channel file - version mismatch - update get_delays");
             exit(EXIT_FAILURE);
         }
 
@@ -1284,7 +1323,10 @@ int main(int argc, char **argv) {
         
         
     }
-    
+
+// EDIT: Sam --> Here might be the most likely candidate for where "calc_beam"
+//               functionality starts.
+
     int nspec = 1;
     size_t items_to_read = nstation*npol*nchan*2;
     float *spectrum = (float *) calloc(nspec*nchan,sizeof(float));
@@ -1749,10 +1791,10 @@ int main(int argc, char **argv) {
                 pf.sub.lst += pf.sub.tsubint;;
                 fprintf(stderr,"Done.  Wrote %d subints (%f sec) in %d files.  status = %d\n",
                        pf.tot_rows, pf.T, pf.filenum, pf.status);
-                
-                
-                
-                
+
+// EDIT: Sam --> I have a feeling these two (repeated from earlier?) if statements are here
+//               by mistake, trying to read files that have already reached EOF, and thus
+//               failing with the extraneous error messages we see all the time in the output.
                 if (complex_weights) {
                     phase_pos = get_phases(nstation,nchan,npol,phases_file, &weights_array, &phases_array, &complex_weights_array,phase_pos);
                     if (phase_pos < 0) {
@@ -1767,7 +1809,7 @@ int main(int argc, char **argv) {
                         goto BARRIER;
                     }
                 }
-                
+// EDIT: Sam --> End of section described in previous edit
                 
                 offset_out = 0;
                 offset_in = 0;
