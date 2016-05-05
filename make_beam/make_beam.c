@@ -946,6 +946,7 @@ int main(int argc, char **argv) {
                     }
                     break;
                 case '2':
+// EDIT: Consider taking this whole case 2 out -- it doesn't seem to ever be used
                     out2 = atoi(optarg);
                     sprintf(out2_name,"input_%.3d_%.2d.txt",out2,me);
                     out2_file = fopen(out2_name,"w");
@@ -1080,7 +1081,9 @@ int main(int argc, char **argv) {
         case 128:
             edge = 0;
             fft_mode = 1;
+// EDIT:    break;
         default:
+// EDIT: swap next two lines
             fft_mode = 1;
             edge = 0;
     }
