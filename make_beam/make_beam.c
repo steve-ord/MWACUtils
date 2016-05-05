@@ -476,130 +476,6 @@ int read_pfb_call(char *in_name, int expunge, char *heap) {
     }
 
 }
-int make_get_delay_call(char *delay_file, time_t increment) { // No longer called by this executeable
-    
-    // open the file with the delay call
-    FILE *Dfile = NULL;
-    char *delay_command = NULL;
-    char *new_command = NULL;
-    struct tm delaytime;
-    int test=1;
-    
-    size_t n = 0;
-    
-    Dfile = fopen(delay_file,"rw");
-    // fprintf(stdout,"opening %s\n",delay_file);
-    
-    // parse the line for the time
-    if(Dfile != NULL) {
-        
-        getline(&delay_command,&n,Dfile);
-        fprintf(stdout,"(%ld characters) %s",n,delay_command);
-        
-        new_command = malloc(n+3); // new command will only be 2 chars longer at most
-      
-        
-        while (delay_command != NULL){
-        
-            char *token  = strsep(&delay_command,"-");
-            if (token == NULL) {
-                // fprintf(stdout,"empty token\n");
-            }
-            if (strncmp(delay_command,"z",1) == 0) {
-                    // found the time token
-               
-               
-                char full_time_string[80],junk_chars[64];
-                sscanf(delay_command,"%c %s",junk_chars,full_time_string);
-                // fprintf(stdout,"%s",full_time_string);
-             
-                strptime(full_time_string,"%Y-%m-%dT%H:%M:%S",&delaytime);
-                
-                // increment the time
-                time_t old_time = timegm(&delaytime);
-                time_t new_time = old_time+increment;
-                struct tm *incremented_time = gmtime(&new_time);
-                // we now have to deal with the time formats
-                
-                strcat(new_command,"-");
-                if (test) {
-                    fprintf(stdout,"token:%s\n",token);
-                    fprintf(stdout,"remain:%s\n",delay_command);
-                }
-                strcat(new_command,token);
-                
-                token = strsep(&delay_command,"-"); // year
-                token = strsep(&delay_command,"-"); // month
-                token = strsep(&delay_command,"-"); // day-time
-                
-                // now add our own date
-                
-                strcat(new_command,"-z ");
-                char temp_timestr[80];
-                strftime(temp_timestr,79,"%Y-%m-%dT%H:%M:%S",incremented_time);
-                
-                strcat(new_command,temp_timestr);
-                strcat(new_command," -");
-                strcat (new_command,delay_command); // add on the rest of the command_line
-                
-                // form the new command line
-                if (test)
-                fprintf(stdout,"new:%s\n",new_command);
-                
-                
-                //free(incremented_time);
-             
-                // run it
-                
-                system(new_command);
-                
-                // write the new line to the file
-                fclose(Dfile);
-                unlink(delay_file);
-                Dfile = fopen(delay_file,"w");
-                fprintf(Dfile,"%s\n",new_command);
-                fclose(Dfile);
-                
-                return (1);
-                
-            }
-            else if (strncmp(delay_command,"d",1) == 0) {
-                 // found the declination which <may> have a negative sign -
-                 // quit just in case;
-                fprintf(stderr,"get_delay_call: the declination is before the time in the command line. There could be an ambiguous parsing of the declination. Please ensure the time (-z) is before the declination (-d)\n");
-                return -1;
-                
-            }
-            else {
-                if (strlen(new_command) > 6) {
-                    strcat(new_command,"-");
-                }
-                if (test) {
-                    fprintf(stdout,"token:%s\n",token);
-                    fprintf(stdout,"remain:%s\n",delay_command);
-                }
-                strcat(new_command,token);
-                if (test)
-                    fprintf(stdout,"new:%s\n",new_command);
-                
-        
-            }
-        }
-        free(new_command);
-        fclose(Dfile);
-        return(-1);
-        
-        
-    }
-    else {
-        fprintf(stderr,"Cannot open delay command file %s\n",delay_file);
-        return -1;
-    }
-    
-    
-    
-    
-}
 
 float get_weights(int nstation, int nchan, int npol, int weights, char *weights_file, double **array){
     
@@ -846,7 +722,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Starting ...\n");
 
     MPI_Init(&argc, &argv);
-    int nproc, me,dir_index;
+    int nproc, me, dir_index;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
     MPI_Comm_size(MPI_COMM_WORLD, &nproc);
