@@ -1792,9 +1792,6 @@ int main(int argc, char **argv) {
                 fprintf(stderr,"Done.  Wrote %d subints (%f sec) in %d files.  status = %d\n",
                        pf.tot_rows, pf.T, pf.filenum, pf.status);
 
-// EDIT: Sam --> I have a feeling these two (repeated from earlier?) if statements are here
-//               by mistake, trying to read files that have already reached EOF, and thus
-//               failing with the extraneous error messages we see all the time in the output.
                 if (complex_weights) {
                     phase_pos = get_phases(nstation,nchan,npol,phases_file, &weights_array, &phases_array, &complex_weights_array,phase_pos);
                     if (phase_pos < 0) {
@@ -1809,7 +1806,6 @@ int main(int argc, char **argv) {
                         goto BARRIER;
                     }
                 }
-// EDIT: Sam --> End of section described in previous edit
                 
                 offset_out = 0;
                 offset_in = 0;
