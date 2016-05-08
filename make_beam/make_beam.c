@@ -1768,8 +1768,6 @@ int main(int argc, char **argv) {
             if (fp == NULL) { // need to open the next file
                 if (execute == 1) {
 
-// DEBUG
-fprintf(stderr, "About to call read_pfb_call(1) with first argument:\n  %s\n", filenames[file_no]);
                     if ((read_pfb_call(filenames[file_no],expunge,heap)) < 0) {
                         goto BARRIER;
                     }
@@ -1814,8 +1812,6 @@ fprintf(stderr, "About to call read_pfb_call(1) with first argument:\n  %s\n", f
                     continue;
                 }
 
-// DEBUG
-fprintf(stderr, "About to call read_pfb_call(2) with first argument:\n  %s\n", filenames[file_no]);
                 if ((read_pfb_call(filenames[file_no],expunge,heap)) < 0) {
                     goto BARRIER;
                 }
@@ -1836,8 +1832,6 @@ fprintf(stderr, "About to call read_pfb_call(2) with first argument:\n  %s\n", f
                     continue;
                 }
                 
-// DEBUG
-fprintf(stderr, "About to call read_pfb_call(3) with first argument:\n  %s\n", filenames[file_no]);
                 if ((read_pfb_call(filenames[file_no],expunge,heap)) < 0) {
                     goto BARRIER;
                 }
